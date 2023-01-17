@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <title>Document</title>
+</head>
+<style>
+    b {
+        color : yellow
+    }
+</style>
+<body class="bg-gray-600">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-600 mt-6">
+        <div class="mx-auto max-w-3xl">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-6" id="judul">Detail Film</h2>
+              </div>
+            <img src="https://source.unsplash.com/featured" alt="" id="poster" class="mx-auto pb-2">
+            <div class="overflow-hidden bg-white shadow sm:rounded-md">
+                <ul role="list" class="pt-2 divide-y divide-gray-200 bg-gray-800">
+                  <li class="text-white px-4 py-4 sm:px-6">
+                   <b id="title"></b>
+                  </li>
+                  <li class="text-white px-4 py-4 sm:px-6" id="sinopsis"></li>
+                  <li class="text-white px-4 py-4 sm:px-6">   <b>Genre :</b>  <span id="genre"></span>  </li>
+                  <li class="text-white px-4 py-4 sm:px-6">   <b>Country :</b>  <span id="country"></span>  </li>
+                  <li class="text-white px-4 py-4 sm:px-6">   <b>Release Date :</b>  <span id="releaseDate"></span>  </li>
+                </ul>
+            </div>
+            <div class="flex justify-end"><button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-6"> <a href="index.html"> Kembali ke Menu Awal </a></button></div>
+        </div>
+      </div>      
+
+
+
+  <script>
+    
+    let searchParams = new URLSearchParams(window.location.search);
+    let searchQuery = searchParams.get('id');
+    let url_ajax = `https://api.themoviedb.org/3/movie/${searchQuery}?api_key=15c1c9ce16cc23aa95a85b56b4e35f2b`
+    $.ajax({
+        url: url_ajax,
+        success: function (data){
+            // console.log(data)
+            let html = "";
+            let linkImage = "https://image.tmdb.org/t/p/w500"; 
+            let genre = "";
+            let judul = "Detail Film " + data.original_title;
+
+         $("#judul").html(judul)
+         $("#poster").attr("src", linkImage + data.poster_path)
+         $("#title").html(data.original_title)
+         $("#sinopsis").html(data.overview)
+         $.each(data.genres, function(i,v){
+             genre += v.name + ", "
+         })
+         genre = genre.slice(0, -1)
+        $("#genre").append(genre);
+        $("#jumlahPenonton").append(genre);
+        $("#country").append(data.production_countries[0].name);
+        $("#releaseDate").append(data.release_date);
+      }
+  });
+  </script>
+</body>
+</html>

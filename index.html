@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <title>Document</title>
+</head>
+<style>
+  #pilih_genre {
+  /* Ubah ukuran font dan warna teks */
+  font-size: 16px;
+  color: rgb(238, 238, 238);
+  
+  /* Ubah warna latar belakang dan border */
+  background-color: rgb(94, 89, 89);
+  border: 1px solid rgb(90, 83, 83);
+  
+  /* Ubah ukuran dan style border radius */
+  border-radius: 4px;
+  
+  /* Tambahkan efek hover */
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+#pilih_genre:hover {
+  /* Ubah warna border saat hover */
+  border-color: rgb(255, 249, 249);
+}
+
+#pilih_genre:focus {
+  /* Tambahkan efek outline saat element memiliki focus */
+  outline: none;
+}
+
+#pilih_genre option {
+  /* Ubah ukuran font dan warna teks untuk setiap option */
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+}
+
+.btn {
+  /* Ubah ukuran, warna latar belakang, dan warna teks */
+  font-size: 16px;
+  background-color: #404740 !important;
+  color: rgb(255, 255, 255);
+  
+  /* Ubah ukuran dan style border */
+  border: none;
+  border-radius: 4px;
+  
+  /* Tambahkan efek hover */
+  transition: all 0.3s ease;
+  cursor: pointer;
+  outline: none;
+  
+  /* Tambahkan padding */
+  padding: 0px 16px;
+}
+
+.float-right {
+  /* Tempatkan elemen ke sebelah kanan dari container */
+  float: right;
+}
+
+form {
+  /* Ubah ukuran font */
+  font-size: 16px;
+}
+
+label {
+  /* Ubah warna teks */
+  color: #333;
+  
+  /* Tambahkan margin */
+  margin-right: 8px;
+}
+
+select,
+input[type="text"] {
+  /* Ubah ukuran, warna latar belakang, dan warna teks */
+  font-size: 14px;
+  background-color: rgb(94, 79, 79);
+  color: rgb(255, 255, 255);
+  
+  /* Ubah ukuran dan style border */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  
+  /* Tambahkan padding */
+  padding: 4px 8px;
+}
+
+
+
+</style>
+<body>
+<div class="relative bg-gray-50 px-4 pt-16 pb-20 sm:px-6 lg:px-8 lg:pt-24 lg:pb-28">
+  
+  <div class="absolute inset-0">
+    <div class="h-1/3 bg-white sm:h-2/3"></div>
+  </div>
+  <div class="relative mx-auto max-w-7xl">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Movie</h2>
+    </div>
+    <div class="grid grid-rows-1 grid-flow-col gap-4 mt-6">
+      <div>
+        <form action="#" method="GET">
+          <select name="genre" id="pilih_genre">
+            <option value="ALL">ALL</option>
+          </select>
+          <input type="text" name="title" id="search-query" placeholder="Ketik kata kunci di sini" class="mx-4">
+          <button type="submit" class="btn float-right">Cari</button>
+        </form>
+      </div>
+    </div>
+    <div class="mx-auto mt-12 grid max-w-lg gap-5 lg:max-w-none lg:grid-cols-3" id="listMovie">
+      
+      
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+let searchParams = new URLSearchParams(window.location.search);
+
+// Ambil value dari inputan search-query menggunakan metode get()
+let searchQuery = searchParams.get('title');
+
+// Set value dari inputan search-query sesuai dengan value dari query string
+document.getElementById('search-query').value = searchQuery;
+
+$( document ).ready(function() {
+
+  
+    $.ajax({
+      url: 'genre.json',
+      success: function (data){
+          let id = "#pilih_genre"
+          let selected = ""
+          let genre = `<option value="" selected>ALL</option>`;
+
+            $.each(data.genres, function(i, result){
+              if(searchParams.get('genre') == result.id){
+                selected = "selected"
+              }
+              genre += `<option value="${result.id}" ${selected}> ${result.name}</option>`;
+              selected = "";
+            })
+            $(id).html(genre)
+      },
+    });
+
+    loadData();
+});
+  
+function getGenre(number, id){
+
+  $.ajax({
+    url: 'genre.json',
+    success: function (data){
+        id = "#" + id
+        let genre = "";
+
+        $.each(data.genres, function(i, result){
+          if(number.includes(result.id)){
+              if ( genre !== ""){
+                genre += `,`;
+              }
+              genre += `<span> <a href="?genre=${result.id}"> ${result.name}</a><span>` 
+            }
+          })
+          $(id).html(genre)
+    },
+  });
+  
+}
+
+function loadData(){
+  let url_ajax;
+  if(searchParams.get('title') == null || searchParams.get('title') == ""){
+     url_ajax = "https://api.themoviedb.org/3/movie/now_playing?api_key=15c1c9ce16cc23aa95a85b56b4e35f2b&page_size=100";
+  } else {
+     url_ajax = "https://api.themoviedb.org/3/search/movie?api_key=15c1c9ce16cc23aa95a85b56b4e35f2b&page_size=100&query=" + searchParams.get('title');
+  }
+
+  if(searchParams.get('genre') !== null || searchParams.get('genre') !== ""){
+    url_ajax += "&with_genres=" + searchParams.get('genre');
+  }
+
+
+  $.ajax({
+    url: url_ajax,
+    success: function (data){
+      console.log(data)
+       let html = "";
+       let linkImage = "https://image.tmdb.org/t/p/w500"; 
+
+      $.each(data.results, function(i, result){
+        id = "genre" + i;
+        html += `<div class="flex flex-col overflow-hidden rounded-lg shadow-lg">
+          <div class="flex-shrink-0">
+            <img class="h-auto w-full object-cover" src="${linkImage + result.poster_path}" alt="">
+          </div>
+          <div class="flex flex-1 flex-col justify-between bg-white p-6">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-indigo-600" id="${id}">
+                ${getGenre(result.genre_ids, id)}
+              </p>
+              <a href="detail-film.html?id=${result.id}" class="mt-2 block">
+                <p class="text-xl font-semibold text-gray-900">${result.original_title}</p>
+                <p class="mt-3 text-base text-gray-500">${result.overview}</p>
+              </a>
+            </div>
+          </div>
+        </div>`
+      
+      })
+
+       $("#listMovie").html(html)
+    }
+  });
+
+}
+ 
+</script>
+</body>
+</html>
